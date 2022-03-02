@@ -1,3 +1,8 @@
+"""
+      Treinamento de rede neural convolucional
+      para problemas de classificação de imagens
+"""
+
 import numpy as np
 import torch
 from torch import nn, optim
@@ -50,66 +55,10 @@ class CNN(nn.Module):
         return x
 
 
-model = CNN()
+model = CNN().to("cuda")
 loss_function = nn.NLLLoss()
 optimizer = optim.Adam(model.parameters(), lr=0.001)
 epochs = 50
-
-model = CNN().to("cuda")
-
-train_losses, dev_losses, train_acc, dev_acc = [], [], [], []
-x_axis = []
-# For loop through the epochs
-for e in range(1, epochs+1):
-    losses = 0
-    acc = 0
-    iterations = 0
-    model.train()
-    """
-    For loop through the batches (created using
-    the train loader)
-    """
-    for data, target in train_loader:
-        iterations += 1
-        # Forward and backward pass of the training data
-        pred = model(data)
-    loss = loss_function(pred, target)
-    optimizer.zero_grad()
-    loss.backward()
-    optimizer.step()
-    losses += loss.item()
-    p = torch.exp(pred)
-    top_p, top_class = p.topk(1, dim=1)
-    acc += accuracy_score(target, top_class)
-
-dev_losss = 0
-dev_accs = 0
-iter_2 = 0
-# Validation of model for given epoch
-if e % 5 == 0 or e == 1:
-    x_axis.append(e)
-    with torch.no_grad():
-        model.eval()
-        """
-        For loop through the batches of
-        the validation set
-        """
-        for data_dev, target_dev in dev_loader:
-            iter_2 += 1
-            dev_pred = model(data_dev)
-            dev_loss = loss_function(dev_pred, target_dev)
-            dev_losss += dev_loss.item()
-            dev_p = torch.exp(dev_pred)
-            top_p, dev_top_class = dev_p.topk(1, dim=1)
-            dev_accs += accuracy_score(target_dev, dev_top_class)
-    # Losses and accuracy are appended to be printed
-    train_losses.append(losses/iterations)
-    dev_losses.append(dev_losss/iter_2)
-    train_acc.append(acc / iterations)
-    dev_acc.append(dev_accs / iter_2)
-    print("Epoch: {}/{}.. ".format(e, epochs), "Training Loss: {:.3f}.. ".format(losses / iterations),
-          "Validation Loss: {:.3f}.. ".format(dev_losss / iter_2), "Training Accuracy: {:.3f}.. "
-          .format(acc / iterations), "Validation Accuracy: {:.3f}".format(dev_accs / iter_2))
 
 train_losses, dev_losses, train_acc, dev_acc = [], [], [], []
 x_axis = []
