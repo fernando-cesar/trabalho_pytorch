@@ -1,11 +1,18 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 
+"""
+                 Preparação dos Dados 
+"""
+
 data = pd.read_excel("default of credit card clients.xls", skiprows=1)
 print(data.head())
 
+# remoção de features irrelevantes
 data_clean = data.drop(columns=["ID", "SEX"])
 print(data_clean.head())
+
+# verificar valores ausentes
 total = data_clean.isnull().sum()
 percent = (data_clean.isnull().sum() / data_clean.isnull().count() * 100)
 print(pd.concat([total, percent], axis=1, keys=['Total', 'Percent']).transpose())
@@ -37,17 +44,21 @@ plt.xticks(fontsize=15)
 plt.yticks(fontsize=15)
 plt.show()
 
-# reamostragem da classe subrepresentada
+# reamostragem da classe subrepresentada por meio da duplicação de linhas
 data_sim = data_clean[data_clean["default payment next month"] == 1]
 data_nao = data_clean[data_clean["default payment next month"] == 0]
 over_sampling = data_sim.sample(nao, replace=True, random_state=0)
 data_resampled = pd.concat([data_nao, over_sampling], axis=0)
 
+# divide o conjunto de dados em uma matriz de features e uma matriz de rótulos
+# para evitar redimensionar os valores de rótulos
 data_resampled = data_resampled.reset_index(drop=True)
 X = data_resampled.drop(columns=["default payment next month"])
-y = data_resampled ["default payment next month"]
+y = data_resampled["default payment next month"]
 
+# redimensiona os valores da matriz de features para evitar a introdução de viés no modelo
 X = (X - X.min())/(X.max() - X.min())
+print('\n')
 print(X.head())
 
 # salvando dados normalizados em arquivo csv
